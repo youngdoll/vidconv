@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Converter</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Video Converter</h1>
+        <input type="text" id="video_url" placeholder="Введите ссылку на видео">
+        <button onclick="fetchFormats()">Получить форматы</button>
+
+        <div id="formats" class="hidden">
+            <label for="format_select">Выберите формат:</label>
+            <select id="format_select"></select>
+            <label><input type="checkbox" id="convert_mp3"> Конвертировать в MP3</label>
+            <button onclick="downloadVideo()">Скачать</button>
+        </div>
+
+        <div id="info" class="hidden"></div>
+    </div>
+
+    <script>
+        function fetchFormats() {
+            let url = document.getElementById("video_url").value;
+            fetch("/get_formats", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: url })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                let select = document.getElementById("format_select");
+                select.innerHTML = "";
+                data.formats.forEach(f => {
+                    let option = document.createElement("option");
+                    option.value = f.format_id;
+                    option.text = `${f.ext} (${f.format_id})`;
+                    select.appendChild(option);
+                });
+                document.getElementById("formats").classList.remove("hidden");
+                document.getElementById("info").innerHTML = `Название: ${data.title} <br> Длительность: ${data.duration} сек`;
+                document.getElementById("info").classList.remove("hidden");
+            });
+        }
+
+        function downloadVideo() {
+            let url = document.getElementById("video_url").value;
+            let format = document.getElementById("format_select").value;
+            let convertToMp3 = document.getElementById("convert_mp3").checked;
+
+            fetch("/download", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: url, format: format, convert_to_mp3: convertToMp3 })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                window.location.href = `/download_file?file=${encodeURIComponent(data.file)}`;
+            });
+        }
+    </script>
+</body>
+</html>

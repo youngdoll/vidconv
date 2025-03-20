@@ -1,0 +1,19 @@
+body {
+    background-color: blue;
+    color: green;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.container {
+    margin-top: 50px;
+}
+
+input, select, button {
+    margin: 10px;
+    padding: 10px;
+}
+
+.hidden {
+    display: none;
+}
