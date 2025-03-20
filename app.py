@@ -14,6 +14,7 @@ def get_video_info(url):
     ydl_opts = {
         'quiet': True,
         'format': 'bestaudio/bestvideo',
+        'cookiefile': 'cookies.txt'
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=False)
@@ -30,6 +31,7 @@ def download_video(url, format_id):
         'quiet': True,
         'format': format_id,
         'outtmpl': output_file,
+        'cookiefile': 'cookies.txt'
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
