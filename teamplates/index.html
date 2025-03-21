@@ -6,16 +6,52 @@
     <title>Видео Конвертер</title>
 </head>
 <body>
-    <h1>Скачивание и конвертация видео</h1>
-    <form action="/convert" method="post">
-        <label for="url">Введите ссылку:</label>
+    <h1>Конвертер видео</h1>
+    <form id="convertForm">
+        <label for="url">Введите ссылку на видео:</label>
         <input type="text" id="url" name="url" required>
         <label for="format">Выберите формат:</label>
         <select id="format" name="format">
-            <option value="mp4">MP4 (Видео)</option>
-            <option value="mp3">MP3 (Аудио)</option>
+            <option value="mp4">MP4</option>
+            <option value="mp3">MP3</option>
         </select>
-        <button type="submit">Скачать</button>
+        <button type="submit">Получить</button>
     </form>
+
+    <p id="status"></p>
+    <a id="downloadLink" style="display: none;" download>Скачать файл</a>
+
+    <script>
+        document.getElementById("convertForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const url = document.getElementById("url").value;
+            const format = document.getElementById("format").value;
+            const status = document.getElementById("status");
+            const downloadLink = document.getElementById("downloadLink");
+
+            status.textContent = "Загрузка...";
+            downloadLink.style.display = "none";
+
+            fetch("/convert", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ url: url, format: format }),
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Ошибка при скачивании");
+                return response.blob();
+            })
+            .then(blob => {
+                const objectURL = URL.createObjectURL(blob);
+                downloadLink.href = objectURL;
+                downloadLink.textContent = "Скачать файл";
+                downloadLink.style.display = "block";
+                status.textContent = "Готово!";
+            })
+            .catch(error => {
+                status.textContent = "Ошибка: " + error.message;
+            });
+        });
+    </script>
 </body>
 </html>
